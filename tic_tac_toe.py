@@ -3,26 +3,27 @@ import random, time, copy
 from os import system
 from computer import Computer
 
+# clear the terminal
 def clear(): _ = system('cls')
 
+# The tic-tac-toe grid
 class GameGrid():
 
     def __init__(self):
-
         self.game_over = False
         self.filled = False
-        self.winning_letter = ''
+        self.winner = None
 
         self.positions = []
         for i in range(9): self.positions.append(' ')
 
         self.winning_configs = [[1,2,3], [4,5,6], [7,8,9],
-                    [1,4,7], [2,5,8], [3,6,9],
-                    [1,5,9], [3,5,7]                   
-                    ]
+                                [1,4,7], [2,5,8], [3,6,9],
+                                [1,5,9], [3,5,7]                   
+                               ]
         # nothing
-        # print(self.positions)
 
+    # Draw the grid
     def draw(self):
         print('1    |2    |3    ')
         print('  {}  |  {}  |  {} '.format( self.positions[0], self.positions[1], self.positions[2]))
@@ -34,24 +35,31 @@ class GameGrid():
         print('  {}  |  {}  |  {}   '.format( self.positions[6], self.positions[7], self.positions[8]))
         print('     |     |      ')
 
+    # Makes a move on the grid. Assumes the moves are valid
     def make_move(self, position, letter):
         position_idx = position - 1
         self.positions[position_idx] = letter
         return
 
+    # Check for a tie or a win
     def check_board(self):
 
+        # If there are no empty spots, its a tie
         if not self.empty_spots(): 
-            self.winning_letter = ''
+            self.winner = None
             self.game_over = True
 
+        # If there is a winning configuration, we have a winner
         for config in self.winning_configs:
             x,y,z = config
             if self.positions[x-1] != ' ':
                 if self.positions[x-1] == self.positions[y-1] == self.positions[z-1]:
-                    self.winning_letter = self.positions[x-1]
+                    self.winner = self.positions[x-1]
                     self.game_over = True
 
+        # NOTE: By checking for ties first and then winning config, it ensure that there can be a winner even if all positions are filled
+
+    # Checks for empty spots in the grid. It returns a list of all the empty spots (positions)
     def empty_spots(self):
         empty_spots = []
         for position_idx, val in enumerate(self.positions):
@@ -60,26 +68,32 @@ class GameGrid():
         # print('Empty Spots:', empty_spots)
         return empty_spots
 
+    # returns a deep copy of the positions on the board
     def get_positions(self):
         return copy.deepcopy(self.positions)
 
 
 class Player():
     def __init__(self, letter):
-
         if letter not in ['X', 'O']:  
             raise ValueError('Invalid Letter:', letter)
 
         self.letter = letter
 
+    # Ask player for a move, keep asking until they enter a valid move
     def choose_move(self, positions):
         while True:
-            position = int(input('Position: '))
+            position = input('Position: ')
+
+            try: position = int(position)
+            except: continue
+
             if self.valid(position, positions):
                 break
 
         return position
 
+    # Check validity of a move
     def valid(self, position, positions):
         position_idx = position - 1
 
@@ -95,8 +109,10 @@ class Player():
 
     
 
+# Choose who is X and who is O
 def choose_letters():
     
+    # Make sure to get valid input
     while True:
         player_letter = input('Choose X or O: ').upper()
         if player_letter in ['X', 'O']: break
@@ -108,24 +124,25 @@ def choose_letters():
 
 
 def main():
-    player_letter, AI_letter = choose_letters()
-
+    
     grid = GameGrid()
+    grid.draw()
+    
+    player_letter, AI_letter = choose_letters()    
     AI = Computer(AI_letter)
     player = Player(player_letter)
 
+    # Randomly choose who goes first
     turn = ''
     next_turn = random.choice([player.letter, AI.letter])
 
-
+    # While the game is not over, keep playing
     while not grid.game_over:
         clear()        
         turn = next_turn
-
-        # print('Turn: ', turn)
         grid.draw()
-        if turn == player.letter:
 
+        if turn == player.letter:
             letter = player.letter
             position = player.choose_move(grid.get_positions())
             next_turn = AI.letter
@@ -137,26 +154,16 @@ def main():
         grid.make_move(position, letter)
         grid.check_board()
     
-    # clear()  
+    # If game is over, draw the final state of the board
+    clear()  
     grid.draw()
-    if grid.winning_letter: print(grid.winning_letter, "Wins!")
+    if grid.winner:
+        if grid.winner == player.letter:
+            print('You cheated') 
+        else:
+            print('You fucking loser')
+            
     else: print('Tie')
-
-
-    
-    # grid.draw()
-
-    # letter = 'X'
-    # while True:
-        
-    #     position = int(input('Position: '))
-    #     clear()
-    #     grid.make_move(position, letter)
-    #     grid.draw()
-    #     grid.check_board()
-        
-    # pass
-
 
 if __name__ == '__main__':
     main()
