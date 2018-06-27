@@ -26,10 +26,14 @@ class Computer():
         return random.choice(self.empty_spots(positions))
 
     # SEE THE FUTURE
-    def minimax(self, config, memo = None, maxingPlayer = True, dept = 0):
+    def minimax(self, config, memo = None, maxingPlayer = True):
 
-        if memo == None: memo = set()
-        dept += 1
+        if memo == None:
+            first_lvl = True 
+            memo = set()
+
+        else:
+            first_lvl = False
 
         # print(config)
         game_over, winner = self.check_board(config)
@@ -37,15 +41,12 @@ class Computer():
         if game_over:
             if winner == self.letter:
                 weight = 10
-                # print('Score:', weight)
                 return weight, memo
             elif winner == self.opp_letter: 
                 weight = -10
-                # print('Score:', weight)
                 return weight, memo
             else: 
                 weight = 0
-                # print('Score:', weight)
                 return weight, memo
 
         empty_spots = self.empty_spots(config)
@@ -57,13 +58,13 @@ class Computer():
 
             for spot in empty_spots:
                 updated_config = self.update_config(config, spot, self.letter)
-                val, memo = self.minimax(updated_config, memo, False, dept)
+                val, memo = self.minimax(updated_config, memo, False)
 
                 if (val > best_val):
                     best_val = val
                     best_spot = spot
 
-            if dept == 1: memo.add(best_spot)
+            if first_lvl == True: memo.add(best_spot)
 
         if not maxingPlayer:
             best_val = float('inf')
@@ -71,7 +72,7 @@ class Computer():
 
             for spot in empty_spots:
                 updated_config = self.update_config(config, spot, self.opp_letter)
-                val, memo = self.minimax(updated_config, memo, True, dept)
+                val, memo = self.minimax(updated_config, memo, True)
 
                 if val < best_val:
                     best_val = val
@@ -85,17 +86,11 @@ class Computer():
         updated_config[spot-1] = letter
         return updated_config
 
-
-
     def empty_spots(self, positions):
         empty_spots = []
         for position_idx, val in enumerate(positions):
             if val == ' ': empty_spots.append(position_idx+1)
         return empty_spots 
-
-
-
-
 
     def check_board(self, positions):
         game_over = False
