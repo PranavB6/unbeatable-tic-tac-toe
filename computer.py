@@ -1,8 +1,11 @@
 
-import random, copy
+import random, copy, time
 
 class Computer():
-    def __init__(self, letter):
+    def __init__(self, letter, mode):
+
+        self.mode = mode
+
         if letter not in ['X', 'O']: raise ValueError('Invalid Letter:', letter)
 
         self.letter = letter
@@ -17,13 +20,21 @@ class Computer():
         
     def choose_move(self, positions):
 
-        if len(self.empty_spots(positions)) < 9:
-            val, memo = self.minimax(positions)
-            print("Best moves for AI:", memo)
+        if len(self.empty_spots(positions)) == 9:
+            return random.choice(self.empty_spots(positions))
 
+        elif self.mode == 1: 
+            return random.choice(self.empty_spots(positions))
+
+        elif self.mode == 2:
+            random_spot = random.choice(self.empty_spots(positions))
+            _, memo = self.minimax(positions)
+
+            return random.choice([random_spot, memo.pop()])
+
+        elif self.mode == 3:
+            _, memo = self.minimax(positions)
             return memo.pop()
-
-        return random.choice(self.empty_spots(positions))
 
     # SEE THE FUTURE
     def minimax(self, config, memo = None, maxingPlayer = True):

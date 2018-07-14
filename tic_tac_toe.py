@@ -9,7 +9,9 @@ def clear(): _ = system('cls')
 # The tic-tac-toe grid
 class GameGrid():
 
-    def __init__(self):
+    def __init__(self, mode_str):
+        self.mode_str = mode_str
+
         self.game_over = False
         self.filled = False
         self.winner = None
@@ -25,6 +27,7 @@ class GameGrid():
 
     # Draw the grid
     def draw(self):
+        print('Mode:', self.mode_str)
         print('1    |2    |3    ')
         print('  {}  |  {}  |  {} '.format( self.positions[0], self.positions[1], self.positions[2]))
         print('_____|_____|_____')
@@ -122,14 +125,27 @@ def choose_letters():
 
     return player_letter, AI_letter
 
+def choose_mode():
+
+    while True:
+        mode = input('Choose Easy (1), Medium (2), Impossible (3): ')
+        if mode in ['1', '2', '3']: break
+
+    mode = int(mode)
+    
+    if mode == 1: mode_str = 'Easy'
+    elif mode == 2: mode_str = 'Medium'
+    elif mode ==3: mode_str = 'Impossible'
+
+    return mode, mode_str
 
 def main():
     
-    grid = GameGrid()
-    grid.draw()
-    
-    player_letter, AI_letter = choose_letters()    
-    AI = Computer(AI_letter)
+    mode, mode_str = choose_mode()
+    player_letter, AI_letter = choose_letters()  
+
+    grid = GameGrid(mode_str)
+    AI = Computer(AI_letter, mode)
     player = Player(player_letter)
 
     # Randomly choose who goes first
@@ -159,9 +175,11 @@ def main():
     grid.draw()
     if grid.winner:
         if grid.winner == player.letter:
-            print('You cheated') 
+            # If you win
+            print('Fucking Bastard') 
         else:
-            print('You fucking loser')
+            # If you lose
+            print('Fucking loser')
             
     else: print('Tie')
 
